@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+        #player {
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            background: #eee;
+            padding: 10px;
+        }
+        #playlist {
+            height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+        .song {
+            cursor: pointer;
+            padding: 5px;
+        }
+        .song:hover {
+            background: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Music Player</h1>
+    <button id="refresh">Refresh Library</button>
+    <div id="library">
+        <h2><a href="#" data-type="songs">All Songs</a></h2>
+        <h2><a href="#" data-type="artists">Artists</a></h2>
+        <h2><a href="#" data-type="albums">Albums</a></h2>
+        <h2><a href="#" data-type="genres">Genres</a></h2>
+    </div>
+    <div id="playlist"></div>
+    <div id="player">
+        <audio id="audio" controls></audio>
+    </div>
+
+    <script>
+        const audio = document.getElementById('audio');
+        const playlist = document.getElementById('playlist');
+        const libraryLinks = document.querySelectorAll('#library a');
+        const refreshButton = document.getElementById('refresh');
+
+        async function fetchAndDisplay(type) {
+            const response = await fetch(`/${type}`);
+            const data = await response.json();
+            playlist.innerHTML = '';
+            if (type === 'songs') {
+                data.forEach(song => {
+                    const div = document.createElement('div');
+                    div.className = 'song';
+                    div.textContent = `${song.title} - ${song.artist}`;
+                    div.dataset.id = song.id;
+                    div.addEventListener('click', () => {
+                        audio.src = `/song/${song.id}`;
+                        audio.play();
+                    });
+                    playlist.appendChild(div);
+                });
+            } else {
+                 data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.textContent = item;
+                    playlist.appendChild(div);
+                });
+            }
+        }
+
+        libraryLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const type = e.target.dataset.type;
+                fetchAndDisplay(type);
+            });
+        });
+
+        refreshButton.addEventListener('click', async () => {
+            await fetch('/refresh', { method: 'POST' });
+            fetchAndDisplay('songs');
+        });
+
+        // Initially load all songs
+        fetchAndDisplay('songs');
+    </script>
+</body>
+</html>
