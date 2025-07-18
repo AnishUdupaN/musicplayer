@@ -4,179 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Player</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #fff;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            display: flex;
-            height: 100vh;
-        }
-
-        .sidebar {
-            width: 250px;
-            background-color: #000;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar h1 {
-            font-size: 24px;
-            margin-bottom: 30px;
-        }
-
-        .sidebar .nav-links a {
-            display: block;
-            color: #b3b3b3;
-            text-decoration: none;
-            padding: 10px 0;
-            font-size: 16px;
-            transition: color 0.3s;
-        }
-
-        .sidebar .nav-links a:hover,
-        .sidebar .nav-links a.active {
-            color: #fff;
-        }
-        
-        .sidebar .refresh-library {
-            margin-top: auto;
-        }
-
-        .sidebar .refresh-library button {
-            background-color: #1db954;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            width: 100%;
-            font-size: 14px;
-            transition: background-color 0.3s;
-        }
-
-        .sidebar .refresh-library button:hover {
-            background-color: #1ed760;
-        }
-
-
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .song-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .song-list-header {
-            display: flex;
-            padding: 10px;
-            border-bottom: 1px solid #282828;
-            font-weight: bold;
-            color: #b3b3b3;
-        }
-
-        .song-list-header .song-title {
-            flex: 1;
-        }
-
-        .song-list-header .song-artist {
-            width: 30%;
-        }
-
-
-        .song-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            border-radius: 5px;
-        }
-
-        .song-item:hover {
-            background-color: #282828;
-        }
-
-        .song-item .song-title {
-            flex: 1;
-        }
-        
-        .song-item .song-artist {
-            width: 30%;
-            color: #b3b3b3;
-        }
-
-        .player {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #181818;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .player-controls button {
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 20px;
-            cursor: pointer;
-            margin: 0 15px;
-            transition: color 0.3s;
-        }
-
-        .player-controls button:hover {
-            color: #1db954;
-        }
-
-        .progress-container {
-            width: 40%;
-            height: 4px;
-            background-color: #535353;
-            border-radius: 2px;
-            cursor: pointer;
-            margin: 0 20px;
-        }
-
-        .progress-bar {
-            width: 0;
-            height: 100%;
-            background-color: #1db954;
-            border-radius: 2px;
-        }
-        
-        .volume-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .volume-container i {
-            font-size: 18px;
-            margin-right: 10px;
-        }
-
-        .volume-slider {
-            width: 100px;
-        }
-
-    </style>
 </head>
 <body>
+    <audio id="audio"></audio>
     <div class="container">
         <div class="sidebar">
             <h1>Music Player</h1>
@@ -192,6 +24,7 @@
         </div>
         <div class="main-content">
             <div class="song-list-header">
+                <div class="song-number">#</div>
                 <div class="song-title">Title</div>
                 <div class="song-artist">Artist</div>
             </div>
@@ -202,14 +35,22 @@
     </div>
 
     <div class="player">
-        <audio id="audio"></audio>
-        <div class="player-controls">
-            <button id="prev-btn"><i class="fas fa-backward"></i></button>
-            <button id="play-pause-btn"><i class="fas fa-play"></i></button>
-            <button id="next-btn"><i class="fas fa-forward"></i></button>
+        <div class="player-info">
+            <div class="player-album-art" id="player-album-art"></div>
+            <div class="player-song-details">
+                <div class="player-song-title" id="player-song-title"></div>
+                <div class="player-song-artist" id="player-song-artist"></div>
+            </div>
         </div>
-        <div class="progress-container" id="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
+        <div class="player-controls">
+            <div class="player-buttons">
+                <button id="prev-btn"><i class="fas fa-backward"></i></button>
+                <button id="play-pause-btn"><i class="fas fa-play"></i></button>
+                <button id="next-btn"><i class="fas fa-forward"></i></button>
+            </div>
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
         </div>
         <div class="volume-container">
             <i class="fas fa-volume-up"></i>
@@ -228,6 +69,9 @@
         const progressBar = document.getElementById('progress-bar');
         const progressContainer = document.getElementById('progress-container');
         const volumeSlider = document.getElementById('volume-slider');
+        const playerAlbumArt = document.getElementById('player-album-art');
+        const playerSongTitle = document.getElementById('player-song-title');
+        const playerSongArtist = document.getElementById('player-song-artist');
 
         let songs = [];
         let currentSongIndex = 0;
@@ -243,6 +87,22 @@
                     li.className = 'song-item';
                     li.dataset.index = index;
 
+                    const songNumber = document.createElement('div');
+                    songNumber.className = 'song-number';
+                    songNumber.textContent = index + 1;
+
+                    const songDetails = document.createElement('div');
+                    songDetails.className = 'song-details';
+
+                    const albumArt = document.createElement('div');
+                    albumArt.className = 'album-art';
+                    if (song.albumArt) {
+                        albumArt.style.backgroundImage = `url(${song.albumArt})`;
+                    }
+
+                    const songInfo = document.createElement('div');
+                    songInfo.className = 'song-info';
+
                     const titleDiv = document.createElement('div');
                     titleDiv.className = 'song-title';
                     titleDiv.textContent = song.title;
@@ -250,9 +110,14 @@
                     const artistDiv = document.createElement('div');
                     artistDiv.className = 'song-artist';
                     artistDiv.textContent = song.artist;
-                    
-                    li.appendChild(titleDiv);
-                    li.appendChild(artistDiv);
+
+                    songInfo.appendChild(titleDiv);
+                    songInfo.appendChild(artistDiv);
+                    songDetails.appendChild(albumArt);
+                    songDetails.appendChild(songInfo);
+                    li.appendChild(songNumber);
+                    li.appendChild(songDetails);
+
 
                     li.addEventListener('click', () => {
                         currentSongIndex = index;
@@ -275,6 +140,19 @@
             const song = songs[index];
             audio.src = `/song/${song.id}`;
             updatePlayPauseIcon(false);
+            
+            playerSongTitle.textContent = song.title;
+            playerSongArtist.textContent = song.artist;
+            if (song.albumArt) {
+                playerAlbumArt.style.backgroundImage = `url(${song.albumArt})`;
+            } else {
+                playerAlbumArt.style.backgroundImage = '';
+            }
+
+            document.querySelectorAll('.song-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`.song-item[data-index="${index}"]`).classList.add('active');
         }
 
         function updatePlayPauseIcon(isPlaying) {

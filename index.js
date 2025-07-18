@@ -114,7 +114,7 @@ app.get('/song/:id', (req, res) => {
             return;
         }
         if (row) {
-            res.sendFile(row.path);
+            res.sendFile(path.join(__dirname, row.path));
         } else {
             res.status(404).send('Song not found');
         }
@@ -126,7 +126,11 @@ app.post('/refresh', async (req, res) => {
     res.send('Library refreshed');
 });
 
-app.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
-    scanSongs();
-});
+const startServer = async () => {
+    await scanSongs();
+    app.listen(port, () => {
+        console.log(`Server listening at http://localhost:${port}`);
+    });
+};
+
+startServer();
