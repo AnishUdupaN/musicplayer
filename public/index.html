@@ -1,83 +1,325 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Player</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            margin: 0;
+            padding: 0;
         }
-        #player {
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #000;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar h1 {
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+
+        .sidebar .nav-links a {
+            display: block;
+            color: #b3b3b3;
+            text-decoration: none;
+            padding: 10px 0;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .sidebar .nav-links a:hover,
+        .sidebar .nav-links a.active {
+            color: #fff;
+        }
+        
+        .sidebar .refresh-library {
+            margin-top: auto;
+        }
+
+        .sidebar .refresh-library button {
+            background-color: #1db954;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
             width: 100%;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .sidebar .refresh-library button:hover {
+            background-color: #1ed760;
+        }
+
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .song-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .song-list-header {
+            display: flex;
+            padding: 10px;
+            border-bottom: 1px solid #282828;
+            font-weight: bold;
+            color: #b3b3b3;
+        }
+
+        .song-list-header .song-title {
+            flex: 1;
+        }
+
+        .song-list-header .song-artist {
+            width: 30%;
+        }
+
+
+        .song-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-radius: 5px;
+        }
+
+        .song-item:hover {
+            background-color: #282828;
+        }
+
+        .song-item .song-title {
+            flex: 1;
+        }
+        
+        .song-item .song-artist {
+            width: 30%;
+            color: #b3b3b3;
+        }
+
+        .player {
             position: fixed;
             bottom: 0;
             left: 0;
-            background: #eee;
-            padding: 10px;
+            width: 100%;
+            background-color: #181818;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        #playlist {
-            height: calc(100vh - 100px);
-            overflow-y: auto;
-        }
-        .song {
+
+        .player-controls button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
             cursor: pointer;
-            padding: 5px;
+            margin: 0 15px;
+            transition: color 0.3s;
         }
-        .song:hover {
-            background: #ddd;
+
+        .player-controls button:hover {
+            color: #1db954;
         }
+
+        .progress-container {
+            width: 40%;
+            height: 4px;
+            background-color: #535353;
+            border-radius: 2px;
+            cursor: pointer;
+            margin: 0 20px;
+        }
+
+        .progress-bar {
+            width: 0;
+            height: 100%;
+            background-color: #1db954;
+            border-radius: 2px;
+        }
+        
+        .volume-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .volume-container i {
+            font-size: 18px;
+            margin-right: 10px;
+        }
+
+        .volume-slider {
+            width: 100px;
+        }
+
     </style>
 </head>
 <body>
-    <h1>Music Player</h1>
-    <button id="refresh">Refresh Library</button>
-    <div id="library">
-        <h2><a href="#" data-type="songs">All Songs</a></h2>
-        <h2><a href="#" data-type="artists">Artists</a></h2>
-        <h2><a href="#" data-type="albums">Albums</a></h2>
-        <h2><a href="#" data-type="genres">Genres</a></h2>
+    <div class="container">
+        <div class="sidebar">
+            <h1>Music Player</h1>
+            <div class="nav-links">
+                <a href="#" class="active" data-type="songs">All Songs</a>
+                <a href="#" data-type="artists">Artists</a>
+                <a href="#" data-type="albums">Albums</a>
+                <a href="#" data-type="genres">Genres</a>
+            </div>
+            <div class="refresh-library">
+                <button id="refresh">Refresh Library</button>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="song-list-header">
+                <div class="song-title">Title</div>
+                <div class="song-artist">Artist</div>
+            </div>
+            <ul class="song-list" id="playlist">
+                <!-- Songs will be dynamically added here -->
+            </ul>
+        </div>
     </div>
-    <div id="playlist"></div>
-    <div id="player">
-        <audio id="audio" controls></audio>
+
+    <div class="player">
+        <audio id="audio"></audio>
+        <div class="player-controls">
+            <button id="prev-btn"><i class="fas fa-backward"></i></button>
+            <button id="play-pause-btn"><i class="fas fa-play"></i></button>
+            <button id="next-btn"><i class="fas fa-forward"></i></button>
+        </div>
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div class="volume-container">
+            <i class="fas fa-volume-up"></i>
+            <input type="range" min="0" max="1" step="0.01" value="1" class="volume-slider" id="volume-slider">
+        </div>
     </div>
 
     <script>
         const audio = document.getElementById('audio');
         const playlist = document.getElementById('playlist');
-        const libraryLinks = document.querySelectorAll('#library a');
+        const libraryLinks = document.querySelectorAll('.nav-links a');
         const refreshButton = document.getElementById('refresh');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const progressContainer = document.getElementById('progress-container');
+        const volumeSlider = document.getElementById('volume-slider');
+
+        let songs = [];
+        let currentSongIndex = 0;
 
         async function fetchAndDisplay(type) {
             const response = await fetch(`/${type}`);
             const data = await response.json();
             playlist.innerHTML = '';
             if (type === 'songs') {
-                data.forEach(song => {
-                    const div = document.createElement('div');
-                    div.className = 'song';
-                    div.textContent = `${song.title} - ${song.artist}`;
-                    div.dataset.id = song.id;
-                    div.addEventListener('click', () => {
-                        audio.src = `/song/${song.id}`;
+                songs = data;
+                songs.forEach((song, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'song-item';
+                    li.dataset.index = index;
+
+                    const titleDiv = document.createElement('div');
+                    titleDiv.className = 'song-title';
+                    titleDiv.textContent = song.title;
+
+                    const artistDiv = document.createElement('div');
+                    artistDiv.className = 'song-artist';
+                    artistDiv.textContent = song.artist;
+                    
+                    li.appendChild(titleDiv);
+                    li.appendChild(artistDiv);
+
+                    li.addEventListener('click', () => {
+                        currentSongIndex = index;
+                        loadSong(currentSongIndex);
                         audio.play();
                     });
-                    playlist.appendChild(div);
+                    playlist.appendChild(li);
                 });
             } else {
                  data.forEach(item => {
-                    const div = document.createElement('div');
-                    div.textContent = item;
-                    playlist.appendChild(div);
+                    const li = document.createElement('li');
+                    li.className = 'song-item';
+                    li.textContent = item;
+                    playlist.appendChild(li);
                 });
             }
+        }
+
+        function loadSong(index) {
+            const song = songs[index];
+            audio.src = `/song/${song.id}`;
+            updatePlayPauseIcon(false);
+        }
+
+        function updatePlayPauseIcon(isPlaying) {
+            const icon = playPauseBtn.querySelector('i');
+            icon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
+        }
+
+        function playPauseSong() {
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+        }
+        
+        function playNextSong() {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            loadSong(currentSongIndex);
+            audio.play();
+        }
+
+        function playPrevSong() {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            loadSong(currentSongIndex);
+            audio.play();
+        }
+
+        function updateProgress() {
+            const { currentTime, duration } = audio;
+            const progressPercent = (currentTime / duration) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+        }
+
+        function setProgress(e) {
+            const width = this.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
         }
 
         libraryLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
+                libraryLinks.forEach(l => l.classList.remove('active'));
+                e.target.classList.add('active');
                 const type = e.target.dataset.type;
                 fetchAndDisplay(type);
             });
@@ -87,6 +329,19 @@
             await fetch('/refresh', { method: 'POST' });
             fetchAndDisplay('songs');
         });
+
+        playPauseBtn.addEventListener('click', playPauseSong);
+        prevBtn.addEventListener('click', playPrevSong);
+        nextBtn.addEventListener('click', playNextSong);
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('play', () => updatePlayPauseIcon(true));
+        audio.addEventListener('pause', () => updatePlayPauseIcon(false));
+        audio.addEventListener('ended', playNextSong);
+        progressContainer.addEventListener('click', setProgress);
+        volumeSlider.addEventListener('input', (e) => {
+            audio.volume = e.target.value;
+        });
+
 
         // Initially load all songs
         fetchAndDisplay('songs');
